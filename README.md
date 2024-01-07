@@ -36,7 +36,6 @@ To copy Jenkins default password you can use below command
 
 In the jenkins need to set the Maven as global tool 
 
-
 #### pipeline Script ####
 
 node{
@@ -83,7 +82,10 @@ sh sonar.sh start
 			-- Name :- Sonar-Server-7.8 (you can give any name)
 			-- Server URL :- http://-----:9000/
 			-- Add Sonar Server Token (Token we should add as scret text) and save it.
-			
+### Nope:- You can use below URL to configure Sonaqube
+
+https://www.fosstechnix.com/how-to-install-sonarqube-on-ubuntu-22-04-lts/
+
 ##############################################################################################################
 			Install ssh-agent plug in in jenkins
 			
