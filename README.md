@@ -39,34 +39,38 @@ In the jenkins need to set the Maven as global tool
 #### pipeline Script ####
 
 node{
-
-	stage('Clone Repo'){
-		git credentialsId: 'Git-credentials' , url: 'git repository path'
-	}
-	
-	stage('Maven Build'){
+    
+    stage('Clone Repository'){
+        git credentialsId: 'Git-Credentials', url: 'https://github.com/Ramtheja0822/maven-web-app.git'
+     
+    }
+    
+    stage('Maven Build'){
+        def mavenHome = tool name: "Maven-3.8.6", type: "maven"
+	    def mavenCMD = "${mavenHome}/bin/mvn"
+	    sh "${mavenCMD} clean package"
+    }
+    
+    stage('Code Review'){
+        withSonarQubeEnv('SonarQube-9'){
 		def mavenHome = tool name: "Maven-3.8.6", type: "maven"
-		def mavenCMD = "${mavenHome}/bin/mvn"
-		sh "${mavenCMD} clean package"
-	}
-	
-	stage('Code Review / SonarQube Analysis'){
-			withSonarQubeEnv('Sonar-Server-7.8'){
-			def mavenHome = tool name: "Maven-3.8.6", type: "maven"
-			def mavenCMD  = "${mavenHome}/bin/mvn"
-			sh "${mavenCMD} sonar:sonar"
-			}
-	}
-	
-	stage('Upload Build Artifact / Nexus Repository'){
-			copy and paste the generated syntax
-	}
-	
-	stage('Deploy application'){
-		sshagent (['Tomcat-Server-Agent']) {
-			sh 'scp -o StrictHostKeyChecing=no target/01-maven-web-app.war ec2-user@ipaddress of server:/home/user/apache-tomcat-9/webapps'
+		def mavenCMD  = "${mavenHome}/bin/mvn"
+		sh "${mavenCMD} sonar:sonar"
 		}
-	}
+    }
+    
+    stage('Upload Build Artifact'){
+        nexusArtifactUploader artifacts: [[artifactId: '01-maven-web-app', classifier: '', file: 'target/maven-web-app.war', type: 'war']], credentialsId: 'nexus-credentials', groupId: 'in.conprosol', nexusUrl: '44.211.203.55:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'conprosol-snapshot-repository', version: '1.0-SNAPSHOT'
+    }
+    
+    stage('Deploy'){
+        sshagent(['tomcat-server-agent']) {
+         sh 'scp -o StrictHostKeyChecking=no target/maven-web-app.war ubuntu@34.226.148.201:/opt/tomcat/webapps'
+        
+        }
+        
+    }
+}
 
 ########################### SonarQube configuration in Jenins ################################################
 cd /opt/sonarqube-7.8/bin/linux-x86-64
